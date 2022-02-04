@@ -1,0 +1,40 @@
+cd ../1
+cp 211026-122114testing_composition_info.txt ../element_summary/1testing_results.txt
+cd ../2
+cp 211026-122119testing_composition_info.txt ../element_summary/2testing_results.txt
+cd ../3
+cp 211026-122124testing_composition_info.txt ../element_summary/3testing_results.txt
+cd ../4
+cp 211026-122114testing_composition_info.txt ../element_summary/4testing_results.txt
+cd ../5
+cp 211026-122114testing_composition_info.txt ../element_summary/5testing_results.txt
+cd ../6
+cp 211027-110214testing_composition_info.txt ../element_summary/6testing_results.txt
+cd ../7
+cp 211027-110224testing_composition_info.txt ../element_summary/7testing_results.txt
+cd ../8
+cp 211027-110334testing_composition_info.txt ../element_summary/8testing_results.txt
+cd ../9
+cp 211027-110334testing_composition_info.txt ../element_summary/9testing_results.txt
+cd ../10
+cp 211027-110329testing_composition_info.txt ../element_summary/10testing_results.txt 
+cd ../11
+cp 211028-152029testing_composition_info.txt ../element_summary/11testing_results.txt 
+cd ../12
+cp 211028-15209testing_composition_info.txt ../element_summary/12testing_results.txt
+cd ../13
+cp 211028-152034testing_composition_info.txt ../element_summary/13testing_results.txt 
+cd ../14
+cp 211028-152019testing_composition_info.txt ../element_summary/14testing_results.txt 
+cd ../15
+cp 211028-152034testing_composition_info.txt ../element_summary/15testing_results.txt 
+cd ../16
+cp 211029-123019testing_composition_info.txt ../element_summary/16testing_results.txt 
+cd ../17
+cp 211029-123139testing_composition_info.txt ../element_summary/17testing_results.txt 
+cd ../18
+cp 211029-123119testing_composition_info.txt ../element_summary/18testing_results.txt 
+cd ../19
+cp 211029-123114testing_composition_info.txt ../element_summary/19testing_results.txt 
+cd ../20
+cp 211029-123134testing_composition_info.txt ../element_summary/20testing_results.txt 

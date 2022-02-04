@@ -1,0 +1,36 @@
+(base) liut@atom:~/data1/magnetic_struct/1$ cp 211026-122114testing_results.txt ../test_summary/1testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/1$ cd ../2
+(base) liut@atom:~/data1/magnetic_struct/2$ cp 211026-122119testing_results.txt ../test_summary/2testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/2$ cd ../3
+(base) liut@atom:~/data1/magnetic_struct/3$ cp 211026-122124testing_results.txt ../test_summary/3testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/3$ cd ../4
+(base) liut@atom:~/data1/magnetic_struct/4$ cp 211026-122114testing_results.txt ../test_summary/4testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/4$ cd ../5
+(base) liut@atom:~/data1/magnetic_struct/5$ cp 211026-122114testing_results.txt ../test_summary/5testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/5$ cd ../6
+(base) liut@atom:~/data1/magnetic_struct/6$ cp 211027-110214testing_results.txt ../test_summary/6testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/6$ cd ../7
+(base) liut@atom:~/data1/magnetic_struct/7$ cp 211027-110224testing_results.txt ../test_summary/7testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/7$ cd ../8
+(base) liut@atom:~/data1/magnetic_struct/8$ cp 211027-110234testing_results.txt ../test_summary/8testing_results.txt
+cp: cannot stat '211027-110234testing_results.txt': No such file or directory
+(base) liut@atom:~/data1/magnetic_struct/8$ cp 211027-110334testing_results.txt ../test_summary/8testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/8$ cd ../9
+(base) liut@atom:~/data1/magnetic_struct/9$ cp 211027-110329testing_results.txt ../test_summary/9testing_results.txt
+(base) liut@atom:~/data1/magnetic_struct/9$ cd ../10
+(base) liut@atom:~/data1/magnetic_struct/10$ cp 211027-110329testing_results.txt ../test_summary/10testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/10$ cd ../11(base) liut@atom:~/data1/magnetic_struct/11$ cp 211028-152029testing_results.txt ../test_summary/11testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/11$ cd ../12(base) liut@atom:~/data1/magnetic_struct/12$ cp 211028-15209testing_results.txt ../test_summary/12testing_results.txt(base) liut@atom:~/data1/magnetic_struct/12$ cd ../13
+(base) liut@atom:~/data1/magnetic_struct/13$ cp 211028-15234testing_results.txt ../test_summary/13testing_results.txt
+cp: cannot stat '211028-15234testing_results.txt': No such file or directory
+(base) liut@atom:~/data1/magnetic_struct/13$ cp 211028-152034testing_results.txt ../test_summary/13testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/13$ cd ../14(base) liut@atom:~/data1/magnetic_struct/14$ cp 211028-152019testing_results.txt ../test_summary/14testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/14$ cd ../15(base) liut@atom:~/data1/magnetic_struct/15$ cp 211028-152034testing_results.txt ../test_summary/15testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/15$ cd ../16(base) liut@atom:~/data1/magnetic_struct/16$ cp 211029-123019testing_results.txt ../test_summary/16testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/16$ cd ../17(base) liut@atom:~/data1/magnetic_struct/17$ cp 211029-123039testing_results.txt ../test_summary/17testing_results.txt 
+cp: cannot stat '211029-123039testing_results.txt': No such file or directory
+(base) liut@atom:~/data1/magnetic_struct/17$ cp 211029-123139testing_results.txt ../test_summary/17testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/17$ cd ../18(base) liut@atom:~/data1/magnetic_struct/18$ cp 211029-123119testing_results.txt ../test_summary/18testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/18$ cd ../19(base) liut@atom:~/data1/magnetic_struct/19$ cp 211029-123114testing_results.txt ../test_summary/19testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/19$ cd ../20(base) liut@atom:~/data1/magnetic_struct/20$ cp 211029-123134testing_results.txt ../test_summary/20testing_results.txt 
+(base) liut@atom:~/data1/magnetic_struct/20$ 
