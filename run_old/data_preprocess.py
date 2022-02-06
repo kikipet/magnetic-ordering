@@ -61,6 +61,7 @@ magnetic_atoms = ['Ga', 'Tm', 'Y', 'Dy', 'Nb', 'Pu', 'Th', 'Er', 'U',
 
 # m = MPRester(api_key='PqU1TATsbzHEOkSX', endpoint=None, notify_db_version=True, include_user_agent=True)
 m = MPRester(endpoint=None, include_user_agent=True)
+# get structures containing magnetic atoms
 structures = m.query(criteria={"elements": {"$in": magnetic_atoms}, 'blessed_tasks.GGA+U Static': {
                      '$exists': True}}, properties=["material_id", "pretty_formula", "structure", "blessed_tasks", "nsites"])
 
@@ -71,10 +72,11 @@ for struc in structures_copy:
         print("MP Structure Deleted")
 
 # %%
-order_list = []
+# reorder structures with respect to magnetic order
+order_list = []  # list of magnetic orders
 for i in range(len(structures)):
     order = pg.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
-    order_list.append(order.ordering.name)
+    order_list.append(order.ordering.name)  # i.e. FM, AM, NM
 id_NM = []
 id_FM = []
 id_AFM = []
