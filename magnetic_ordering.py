@@ -27,7 +27,7 @@ from pymatgen.ext.matproj import MPRester
 import pymatgen.analysis.magnetism.analyzer as pg
 import numpy as np
 import pickle
-from mendeleev import element
+#from mendeleev import element
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import average_precision_score
