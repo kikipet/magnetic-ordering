@@ -18,3 +18,5 @@ train average loss: 0.6239563888932739
  validation average loss: 0.7376638384455623 
 train average loss: 0.6203525843351843 
  validation average loss: 0.7374793647192779 
+train average loss: 0.6193047757660596 
+ validation average loss: 0.7369321754375318 
