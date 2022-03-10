@@ -146,70 +146,6 @@ lmax = 1
 # Roughly the average number (over entire dataset) of nearest neighbors for a given atom
 n_norm = 35
 
-# num_atom_types scalars (L=0) with even parity
-irreps_in = Irreps([(45, (0, 1))])
-irreps_hidden = Irreps([(64, (0, 1))])  # not sure
-irreps_out = Irreps([(3, (0, 1))])  # len_dos scalars (L=0) with even parity
-
-# number of channels per irrep (differeing L and parity)
-# "mul": params['num_channel_irrep'],
-
-model_kwargs = {
-    # "convolution": Convolution,
-    "irreps_in": irreps_in,
-    "irreps_hidden": irreps_hidden,
-    "irreps_out": irreps_out,
-    "irreps_node_attr": '0e+1e',  # not really sure
-    "irreps_edge_attr": '0e+1e',  # not really sure
-    "layers": params['num_e3nn_layer'],
-    "max_radius": params['max_radius'],
-    "number_of_basis": params['num_basis'],
-    "radial_layers": params['radial_layers'],
-    # for these last 3 I don't know what's normal
-    "radial_neurons": 5,
-    "num_neighbors": 5,
-    "num_nodes": 5
-}
-print(model_kwargs)
-
-
-class AtomEmbeddingAndSumLastLayer(torch.nn.Module):
-    def __init__(self, atom_type_in, atom_type_out, model):
-        super().__init__()
-        self.linear = torch.nn.Linear(atom_type_in, 128)
-        self.model = model
-        self.relu = torch.nn.ReLU()
-        self.linear2 = torch.nn.Linear(128, 96)
-        self.linear3 = torch.nn.Linear(96, 64)
-        self.linear4 = torch.nn.Linear(64, 45)
-        #self.linear5 = torch.nn.Linear(45, 32)
-        #self.softmax = torch.nn.LogSoftmax(dim=1)
-
-    def forward(self, x, *args, batch=None, **kwargs):
-        output = self.linear(x)
-        output = self.relu(output)
-        print(f"Input: {x}")
-        output = self.linear2(output)
-        output = self.relu(output)
-        output = self.linear3(output)
-        output = self.relu(output)
-        output = self.linear4(output)
-        #output = self.linear5(output)
-        output = self.relu(output)
-        output = self.model(output, *args, **kwargs)
-        if batch is None:
-            N = output.shape[0]
-            batch = output.new_ones(N)
-        output = torch_scatter.scatter_add(output, batch, dim=0)
-        print(f"Output: {output}")
-        #output = self.softmax(output)
-        return output
-
-
-model = AtomEmbeddingAndSumLastLayer(
-    atom_types_dim, embedding_dim, Network(**model_kwargs))
-opt = torch.optim.AdamW(
-    model.parameters(), lr=params['adamw_lr'], weight_decay=params['adamw_wd'])
 
 data = []
 count = 0
@@ -222,7 +158,6 @@ for i, struct in enumerate(structures):
         for j, site in enumerate(struct):
             input[j, int(element(str(site.specie)).atomic_number)
                   ] = element(str(site.specie)).atomic_radius
-            #input[j, len_element + int(element(str(site.specie)).atomic_number) +1] = element(str(site.specie)).atomic_weight
             input[j, len_element + int(element(str(site.specie)).atomic_number) +
                   1] = element(str(site.specie)).en_pauling
             input[j, 2*len_element + int(element(str(site.specie)).atomic_number) + 1] = element(
@@ -282,3 +217,4 @@ for i, struc in enumerate(structures):
     compound_list.append(str_struc)
 
 torch.save(data, run_name+'_data.pt')
+pickle.dump((formula_list_mp, sites_list, id_list), open('formula_and_sites.p', 'wb'))
