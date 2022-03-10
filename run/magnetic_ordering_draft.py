@@ -46,47 +46,11 @@ import datetime
 
 # %% Process Materials Project Data
 # if we already have a .pt file to pull data from
-data = torch.load('magnetic_order_data.pt')
-id_list = []  # list of material ids
+data = torch.load('magnetic_ordering_data.pt')
 
 run_name = (time.strftime("%y%m%d-%H%M", time.localtime()))
 
-order_list_mp = []
-structures_list_mp = []
-formula_list_mp = []
-sites_list = []
-id_list_mp = []
-y_values_mp = []
-order_encode = {"NM": 0, "AFM": 1, "FM": 2, "FiM": 2}
-
-magnetic_atoms = ['Ga', 'Tm', 'Y', 'Dy', 'Nb', 'Pu', 'Th', 'Er', 'U',
-                  'Cr', 'Sc', 'Pr', 'Re', 'Ni', 'Np', 'Nd', 'Yb', 'Ce',
-                  'Ti', 'Mo', 'Cu', 'Fe', 'Sm', 'Gd', 'V', 'Co', 'Eu',
-                  'Ho', 'Mn', 'Os', 'Tb', 'Ir', 'Pt', 'Rh', 'Ru']
-
-
-# %%
-# order_list = []
-# for i in range(len(data)):
-#     order = pg.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
-#     # not actually sure if this is saved in the .pt file
-#     order_list.append(order.ordering.name)
-# id_NM = []
-# id_FM = []
-# id_AFM = []
-# for i in range(len(structures)):
-#     if order_list[i] == 'NM':
-#         id_NM.append(i)
-#     if order_list[i] == 'AFM':
-#         id_AFM.append(i)
-#     if order_list[i] == 'FM' or order_list[i] == 'FiM':
-#         id_FM.append(i)
-# np.random.shuffle(id_FM)
-# np.random.shuffle(id_NM)
-# np.random.shuffle(id_AFM)
-# id_AFM, id_AFM_to_delete = np.split(id_AFM, [int(len(id_AFM))])
-# id_NM, id_NM_to_delete = np.split(id_NM, [int(1.2*len(id_AFM))])
-# id_FM, id_FM_to_delete = np.split(id_FM, [int(1.2*len(id_AFM))])
+formula_list_mp, sites_list, id_list = pickle.load(open('formula_and_sites.p', 'rb'))
 
 torch.set_default_dtype(torch.float64)
 
@@ -188,8 +152,6 @@ opt = torch.optim.AdamW(
 
 ###### roughly where preprocessing ends ######
 
-# so do we ever end up splitting by magnetic order, or are all of these trained by the same model?
-
 indices = np.arange(len(data))
 np.random.shuffle(indices)
 index_tr, index_va, index_te = np.split(
@@ -228,8 +190,7 @@ def evaluate(model, dataloader, device):
     with torch.no_grad():
         for j, d in enumerate(dataloader):
             d.to(device)
-            output = model(d.x, d.edge_index, d.edge_attr,
-                           n_norm=n_norm, batch=d.batch)
+            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3))) # CHANGED
             if d.y.item() == 2:
                 loss = cost_multiplier*loss_fn(output, d.y).cpu()
                 print("Multiplied Loss Index \n")
@@ -255,7 +216,6 @@ def train(model, optimizer, dataloader, dataloader_valid, max_iter=101, device="
         loss_cumulative = 0.
         for j, d in enumerate(dataloader):
             d.to(device)
-            # output = model(d.x, d.edge_index, d.edge_attr, n_norm=n_norm, batch=d.batch)
             output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3))) # CHANGED oh boy I hope this is right
             loss = loss_fn(output, d.y).cpu()
             print(f"Iteration {step+1:4d}    batch {j+1:5d} / {len(dataloader):5d}   " + f"batch loss = {loss.data}", end="\r", flush=True)
@@ -326,8 +286,7 @@ training_sites_dict = {}
 for i, index in enumerate(index_tr):
     d = torch_geometric.data.Batch.from_data_list([data[index]])
     d.to(device)
-    output = model(d.x, d.edge_index, d.edge_attr,
-                   n_norm=n_norm, batch=d.batch)
+    output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3))) # CHANGED
 
     if max(output[0][0], output[0][1], output[0][2]) == output[0][0]:
         output = 0
@@ -394,8 +353,7 @@ validation_sites_dict = {}
 for i, index in enumerate(index_va):
     d = torch_geometric.data.Batch.from_data_list([data[index]])
     d.to(device)
-    output = model(d.x, d.edge_index, d.edge_attr,
-                   n_norm=n_norm, batch=d.batch)
+    output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
 
     with open('validation_results.txt', 'a') as f:
         f.write(f"Output for below sample: {torch.exp(output)} \n")
@@ -470,8 +428,7 @@ for i, index in enumerate(index_te):
         print(f"Index being tested: {index}")
         d = torch_geometric.data.Batch.from_data_list([data[index]])
         d.to(device)
-        output = model(d.x, d.edge_index, d.edge_attr,
-                       n_norm=n_norm, batch=d.batch)
+        output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
 
         y_test.append(d.y.item())
 

@@ -1,1 +1,22 @@
-Iteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 Linear
+Iteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 LinearIteration: 1:1:1.1 Relu wd:0.03 4 Lineartrain average loss: 0.8689853252496188 
+ validation average loss: 0.8464377107510359 
+train average loss: 0.852046728031043 
+ validation average loss: 0.8298576341674703 
+train average loss: 0.7540907996922512 
+ validation average loss: 0.7492680448633917 
+train average loss: 0.6747286677378669 
+ validation average loss: 0.662872991908279 
+train average loss: 0.6347219414991465 
+ validation average loss: 0.6449059718543277 
+train average loss: 0.6191691960524248 
+ validation average loss: 0.6309091690471814 
+train average loss: 0.6153416745888677 
+ validation average loss: 0.6314597880836049 
+train average loss: 0.6143465479758653 
+ validation average loss: 0.6310831082652408 
+train average loss: 0.6140782538271147 
+ validation average loss: 0.6312442958791727 
+train average loss: 0.6140060085343597 
+ validation average loss: 0.6312419927981205 
+train average loss: 0.61398464291713 
+ validation average loss: 0.6312511107420669 
