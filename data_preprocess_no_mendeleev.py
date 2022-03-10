@@ -12,7 +12,6 @@ import torch
 import torch_scatter
 
 from data_helpers import DataPeriodicNeighbors
-# are there different sorts of convolutions for different datatypes?
 from e3nn.nn.models.gate_points_2101 import Convolution, Network
 from e3nn.o3 import Irreps
 
