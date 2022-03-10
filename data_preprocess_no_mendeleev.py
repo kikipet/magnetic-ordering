@@ -23,71 +23,74 @@ import pickle
 import time
 
 
-# # %% Process Materials Project Data
-# order_list_mp = []
-# structures_list_mp = []
-# formula_list_mp = []
-# sites_list = []
-# id_list_mp = []
-# y_values_mp = []
-# order_encode = {"NM": 0, "AFM": 1, "FM": 2, "FiM": 2}
+# %% Process Materials Project Data
+order_list_mp = []
+structures_list_mp = []
+formula_list_mp = []
+sites_list = []
+id_list_mp = []
+y_values_mp = []
+order_encode = {"NM": 0, "AFM": 1, "FM": 2, "FiM": 2}
 
-# magnetic_atoms = ['Ga', 'Tm', 'Y', 'Dy', 'Nb', 'Pu', 'Th', 'Er', 'U',
-#                   'Cr', 'Sc', 'Pr', 'Re', 'Ni', 'Np', 'Nd', 'Yb', 'Ce',
-#                   'Ti', 'Mo', 'Cu', 'Fe', 'Sm', 'Gd', 'V', 'Co', 'Eu',
-#                   'Ho', 'Mn', 'Os', 'Tb', 'Ir', 'Pt', 'Rh', 'Ru']
+magnetic_atoms = ['Ga', 'Tm', 'Y', 'Dy', 'Nb', 'Pu', 'Th', 'Er', 'U',
+                  'Cr', 'Sc', 'Pr', 'Re', 'Ni', 'Np', 'Nd', 'Yb', 'Ce',
+                  'Ti', 'Mo', 'Cu', 'Fe', 'Sm', 'Gd', 'V', 'Co', 'Eu',
+                  'Ho', 'Mn', 'Os', 'Tb', 'Ir', 'Pt', 'Rh', 'Ru']
 
-# # m = MPRester(api_key='PqU1TATsbzHEOkSX', endpoint=None, notify_db_version=True, include_user_agent=True)
-# m = MPRester(endpoint=None, include_user_agent=True)
-# structures = m.query(criteria={"elements": {"$in": magnetic_atoms}, 'blessed_tasks.GGA+U Static': {
-#                      '$exists': True}}, properties=["material_id", "pretty_formula", "structure", "blessed_tasks", "nsites"])
+m = MPRester(endpoint=None, include_user_agent=True)
+structures = m.query(criteria={"elements": {"$in": magnetic_atoms}, 'blessed_tasks.GGA+U Static': {
+                     '$exists': True}}, properties=["material_id", "pretty_formula", "structure", "blessed_tasks", "nsites"])
 
-# structures_copy = structures.copy()
-# for struc in structures_copy:
-#     if len(struc["structure"]) > 250:
-#         structures.remove(struc)
-#         print("MP Structure Deleted")
+structures_copy = structures.copy()
+for struc in structures_copy:
+    if len(struc["structure"]) > 250:
+        structures.remove(struc)
+        print("MP Structure Deleted")
 
-# # %%
-# order_list = []
-# for i in range(len(structures)):
-#     order = pg.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
-#     order_list.append(order.ordering.name)
-# id_NM = []
-# id_FM = []
-# id_AFM = []
-# for i in range(len(structures)):
-#     if order_list[i] == 'NM':
-#         id_NM.append(i)
-#     if order_list[i] == 'AFM':
-#         id_AFM.append(i)
-#     if order_list[i] == 'FM' or order_list[i] == 'FiM':
-#         id_FM.append(i)
-# np.random.shuffle(id_FM)
-# np.random.shuffle(id_NM)
-# np.random.shuffle(id_AFM)
-# id_AFM, id_AFM_to_delete = np.split(id_AFM, [int(len(id_AFM))])
-# id_NM, id_NM_to_delete = np.split(id_NM, [int(1.2*len(id_AFM))])
-# id_FM, id_FM_to_delete = np.split(id_FM, [int(1.2*len(id_AFM))])
+# %%
+order_list = []
+for i in range(len(structures)):
+    order = pg.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
+    order_list.append(order.ordering.name)
+id_NM = []
+id_FM = []
+id_AFM = []
+for i in range(len(structures)):
+    if order_list[i] == 'NM':
+        id_NM.append(i)
+    if order_list[i] == 'AFM':
+        id_AFM.append(i)
+    if order_list[i] == 'FM' or order_list[i] == 'FiM':
+        id_FM.append(i)
+np.random.shuffle(id_FM)
+np.random.shuffle(id_NM)
+np.random.shuffle(id_AFM)
+id_AFM, id_AFM_to_delete = np.split(id_AFM, [int(len(id_AFM))])
+id_NM, id_NM_to_delete = np.split(id_NM, [int(1.2*len(id_AFM))])
+id_FM, id_FM_to_delete = np.split(id_FM, [int(1.2*len(id_AFM))])
 
-# structures_mp = [structures[i] for i in id_NM] + [structures[j]
-#                                                   for j in id_FM] + [structures[k] for k in id_AFM]
-# np.random.shuffle(structures_mp)
+structures_mp = [structures[i] for i in id_NM] + [structures[j]
+                                                  for j in id_FM] + [structures[k] for k in id_AFM]
+np.random.shuffle(structures_mp)
 
 
-# for structure in structures_mp:
-#     analyzed_structure = pg.CollinearMagneticStructureAnalyzer(
-#         structure["structure"])
-#     order_list_mp.append(analyzed_structure.ordering)
-#     structures_list_mp.append(structure["structure"])
-#     formula_list_mp.append(structure["pretty_formula"])
-#     id_list_mp.append(structure["material_id"])
-#     sites_list.append(structure["nsites"])
+for structure in structures_mp:
+    analyzed_structure = pg.CollinearMagneticStructureAnalyzer(
+        structure["structure"])
+    order_list_mp.append(analyzed_structure.ordering)
+    structures_list_mp.append(structure["structure"])
+    formula_list_mp.append(structure["pretty_formula"])
+    id_list_mp.append(structure["material_id"])
+    sites_list.append(structure["nsites"])
 
-# for order in order_list_mp:
-#     y_values_mp.append(order_encode[order.name])
+for order in order_list_mp:
+    y_values_mp.append(order_encode[order.name])
 
-structures, y_values, formula_list_mp, sites_list, id_list = pickle.load(open('structure_info.p', 'rb'))
+# structures, y_values, formula_list_mp, sites_list, id_list = pickle.load(open('structure_info.p', 'rb')
+# )
+structures = structures_list_mp
+y_values = y_values_mp
+id_list = id_list_mp
 
 elements = pickle.load(open('element_info.p', 'rb'))
 
