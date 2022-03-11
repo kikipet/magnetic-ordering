@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -c 5
-#SBATCH --gres=gpu:volta:1
+#SBATCH --mail-type=ALL
 
 source /etc/profile
 cd /home/gridsan/sekim
@@ -10,4 +10,5 @@ source .bashrc
 conda activate /home/gridsan/sekim/.conda/envs/e3nn
 
 cd magnetic-ordering/run_0310
-python magnetic_ordering.py
+python data_preprocess_no_mendeleev.py
+python magnetic_ordering_draft.py

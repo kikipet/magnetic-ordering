@@ -1,6 +1,7 @@
 #!/bin/bash
+
+#SBATCH --mail-type=ALL
 #SBATCH -c 5
-#SBATCH --gres=gpu:volta:1
 
 source /etc/profile
 cd /home/gridsan/sekim
