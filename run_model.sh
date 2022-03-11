@@ -1,6 +1,7 @@
 #!/bin/bash
-#SBATCH -c 5
+
 #SBATCH --mail-type=ALL
+#SBATCH -c 5
 
 source /etc/profile
 cd /home/gridsan/sekim
@@ -9,5 +10,5 @@ eval "$(conda shell.bash hook)"
 source .bashrc
 conda activate /home/gridsan/sekim/.conda/envs/e3nn
 
-cd $1
+cd magnetic-ordering/run_0310
 python magnetic_ordering_draft.py
