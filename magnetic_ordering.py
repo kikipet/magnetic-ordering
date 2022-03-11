@@ -2,29 +2,8 @@
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Dec  2 09:10:12 2020
-
-@author: Harry, Helena, and Linh
-"""
 
 from util import *
-
-import torch
-import torch_geometric
-
-from e3nn.nn.models.gate_points_2101 import Network
-from e3nn.o3 import Irreps
-
-import numpy as np
-import pickle
-import matplotlib.pyplot as plt
-
-from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score
-
-import time
-
 
 ### Setup
 run_name = (time.strftime("%y%m%d-%H%M", time.localtime()))
@@ -38,28 +17,28 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ### Set params + initialize model
 params = {'len_embed_feat': 64,
-          'num_channel_irrep': 32,
-          'num_e3nn_layer': 2,
-          'max_radius': 5,
-          'num_basis': 10,
-          'adamw_lr': 0.005,
-          'adamw_wd': 0.03,
-          'radial_layers': 3
-          }
+        'num_channel_irrep': 32,
+        'num_e3nn_layer': 2,
+        'max_radius': 5,
+        'num_basis': 10,
+        'adamw_lr': 0.005,
+        'adamw_wd': 0.03,
+        'radial_layers': 3
+        }
 
 # Used for debugging
 identification_tag = "1:1:1.1 Relu wd:0.03 4 Linear"
 cost_multiplier = 1.0
 
 print('Length of embedding feature vector: {:3d} \n'.format(params.get('len_embed_feat')) +
-      'Number of channels per irreducible representation: {:3d} \n'.format(params.get('num_channel_irrep')) +
-      'Number of tensor field convolution layers: {:3d} \n'.format(params.get('num_e3nn_layer')) +
-      'Maximum radius: {:3.1f} \n'.format(params.get('max_radius')) +
-      'Number of basis: {:3d} \n'.format(params.get('num_basis')) +
-      'AdamW optimizer learning rate: {:.4f} \n'.format(params.get('adamw_lr')) +
-      'AdamW optimizer weight decay coefficient: {:.4f}'.format(
-          params.get('adamw_wd'))
-      )
+    'Number of channels per irreducible representation: {:3d} \n'.format(params.get('num_channel_irrep')) +
+    'Number of tensor field convolution layers: {:3d} \n'.format(params.get('num_e3nn_layer')) +
+    'Maximum radius: {:3.1f} \n'.format(params.get('max_radius')) +
+    'Number of basis: {:3d} \n'.format(params.get('num_basis')) +
+    'AdamW optimizer learning rate: {:.4f} \n'.format(params.get('adamw_lr')) +
+    'AdamW optimizer weight decay coefficient: {:.4f}'.format(
+        params.get('adamw_wd'))
+    )
 
 
 len_element = 118
@@ -79,7 +58,8 @@ model_kwargs = {
     "irreps_hidden": irreps_hidden,
     "irreps_out": irreps_out,
     "irreps_node_attr": '3x0e',
-    "irreps_edge_attr": '1o',  # relative distance vector
+    "irreps_edge_attr": '0e+1o',  # relative distance vector 
+    # "irreps_edge_attr": '1o',  # relative distance vector 
     "layers": params['num_e3nn_layer'],
     "max_radius": params['max_radius'],
     "number_of_basis": params['num_basis'],
@@ -91,10 +71,8 @@ model_kwargs = {
 print(model_kwargs)
 
 
-model = AtomEmbeddingAndSumLastLayer(
-    atom_types_dim, embedding_dim, Network(**model_kwargs))
-opt = torch.optim.AdamW(
-    model.parameters(), lr=params['adamw_lr'], weight_decay=params['adamw_wd'])
+model = AtomEmbeddingAndSumLastLayer(atom_types_dim, embedding_dim, Network(**model_kwargs))
+opt = torch.optim.AdamW(model.parameters(), lr=params['adamw_lr'], weight_decay=params['adamw_wd'])
 
 
 ### prepare data
@@ -113,10 +91,11 @@ for results in train(model, opt, loss_fn, dataloader, dataloader_valid, schedule
         results['model_kwargs'] = model_kwargs
         torch.save(results, f)
 
+plots(run_name)
 
-write_output('training', index_tr, data, model, device, formula_list_mp, id_list)
-write_output('validation', index_va, data, model, device, formula_list_mp, id_list)
-y_test, y_pred = write_output('testing', index_te, data, model, device, formula_list_mp, id_list)
+run_write_data('training', index_tr, data, model, device, formula_list_mp, id_list)
+run_write_data('validation', index_va, data, model, device, formula_list_mp, id_list)
+y_test, y_pred = run_write_data('testing', index_te, data, model, device, formula_list_mp, id_list)
 
 accuracy_score = accuracy_score(y_test, y_pred)
 
@@ -134,6 +113,5 @@ with open('statistics.txt', 'a') as f:
     f.write(f"Identification tag: {identification_tag}\n")
     f.write(f"Accuracy score: {accuracy_score}\n")
     f.write("Classification Report: \n")
-    f.write(classification_report(y_test, y_pred,
-                                  target_names=["NM", "AFM", "FM"]))
+    f.write(classification_report(y_test, y_pred, target_names=["NM", "AFM", "FM"]))
     f.write("\n")

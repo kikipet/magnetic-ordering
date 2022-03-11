@@ -34,6 +34,10 @@ import datetime
 LETTERS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
 
 
+#################
+# Model-related #
+#################
+
 class AtomEmbeddingAndSumLastLayer(torch.nn.Module):
     def __init__(self, atom_type_in, atom_type_out, model):
         super().__init__()
@@ -74,10 +78,8 @@ def create_dataloaders(data, batch_size=1):
     assert set(index_tr).isdisjoint(set(index_va))
     assert set(index_te).isdisjoint(set(index_va))
 
-    dataloader = torch_geometric.loader.DataLoader(
-        [data[i] for i in index_tr], batch_size=batch_size, shuffle=True)
-    dataloader_valid = torch_geometric.loader.DataLoader(
-        [data[i] for i in index_va], batch_size=batch_size)
+    dataloader = torch_geometric.loader.DataLoader([data[i] for i in index_tr], batch_size=batch_size, shuffle=True)
+    dataloader_valid = torch_geometric.loader.DataLoader([data[i] for i in index_va], batch_size=batch_size)
 
     return index_tr, index_va, index_te, dataloader, dataloader_valid
 
@@ -95,7 +97,7 @@ def evaluate(model, loss_fn, dataloader, device, cost_multiplier=1.0):
     with torch.no_grad():
         for _, d in enumerate(dataloader):
             d.to(device)
-            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3))) # CHANGED
+            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
             if d.y.item() == 2:
                 loss = cost_multiplier*loss_fn(output, d.y).cpu()
                 print("Multiplied Loss Index \n")
@@ -121,7 +123,7 @@ def train(model, optimizer, loss_fn, dataloader, dataloader_valid, scheduler, ma
         loss_cumulative = 0.
         for j, d in enumerate(dataloader):
             d.to(device)
-            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3))) # CHANGED
+            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
             loss = loss_fn(output, d.y).cpu()
             print(f"Iteration {step+1:4d}    batch {j+1:5d} / {len(dataloader):5d}   " + f"batch loss = {loss.data}", end="\r", flush=True)
             loss_cumulative = loss_cumulative + loss.detach().item()
@@ -174,7 +176,7 @@ def plots(run_name):
     plt.savefig(run_name+'_hist.png', dpi=300)
 
 
-def write_output(stage, indices, data, model, device, formula_list_mp, id_list):
+def run_write_data(stage, indices, data, model, device, formula_list_mp, id_list):
     composition_dict = {}
     sites_dict = {}
     y_test = []
@@ -202,8 +204,7 @@ def write_output(stage, indices, data, model, device, formula_list_mp, id_list):
             output = 2
         y_pred.append(output)
         with open(f'{stage}_results.txt', 'a') as f:
-            f.write(
-                f"{id_list[index]} {formula_list_mp[index]} Prediction: {output} Actual: {d.y} \n")
+            f.write(f"{id_list[index]} {formula_list_mp[index]} Prediction: {output} Actual: {d.y} \n")
         
         correct_flag = d.y.item() == output
 
@@ -219,13 +220,10 @@ def write_output(stage, indices, data, model, device, formula_list_mp, id_list):
                 if char_index + 1 == len(formula) or formula[char_index + 1].isupper() or formula[char_index + 1] not in LETTERS:
                     print(f"printing to dict {current_element}")
                     if correct_flag:
-                        current_entry = composition_dict.get(
-                            current_element, [0, 0])
-                        current_entry = [
-                            current_entry[0] + 1, current_entry[1] + 1]
+                        current_entry = composition_dict.get(current_element, [0, 0])
+                        current_entry = [current_entry[0] + 1, current_entry[1] + 1]
                     else:
-                        current_entry = composition_dict.get(
-                            current_element, [0, 0])
+                        current_entry = composition_dict.get(current_element, [0, 0])
                         current_entry = [current_entry[0], current_entry[1] + 1]
                     composition_dict[current_element] = current_entry
                     current_element = ""
@@ -234,15 +232,13 @@ def write_output(stage, indices, data, model, device, formula_list_mp, id_list):
     with open(f'{stage}_composition_info.txt', 'a') as f:
         f.write(f"{stage.capitalize()} Composition Ratios: \n")
         for key, value in composition_dict.items():
-            f.write(
-                f"Element: {key} Ratio: {value[0]}/{value[1]} Fraction: {value[0]/value[1]}\n")
+            f.write(f"Element: {key} Ratio: {value[0]}/{value[1]} Fraction: {value[0]/value[1]}\n")
 
     # Accuracy per nsites depiction
     with open(f'{stage}_nsites_info.txt', 'a') as f:
         f.write(f"{stage.capitalize()} Nsites Info: \n")
         for key, value in sites_dict.items():
-            f.write(
-                f"nsites: {key} Ratio: {value[0]}/{value[1]} Fraction: {value[0]/value[1]}\n")
+            f.write(f"nsites: {key} Ratio: {value[0]}/{value[1]} Fraction: {value[0]/value[1]}\n")
 
     if stage == 'testing':
         return y_test, y_pred
