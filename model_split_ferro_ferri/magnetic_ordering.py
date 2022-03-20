@@ -51,7 +51,7 @@ n_norm = 35
 # num_atom_types scalars (L=0) with even parity
 irreps_in = Irreps([(45, (0, 1))])
 irreps_hidden = Irreps([(64, (0, 1)), (64, (1, 1))])  # not sure
-irreps_out = Irreps([(3, (0, 1))])  # len_dos scalars (L=0) with even parity
+irreps_out = Irreps([(4, (0, 1))])  # len_dos scalars (L=0) with even parity
 
 model_kwargs = {
     "irreps_in": irreps_in,
@@ -115,5 +115,5 @@ with open('statistics.txt', 'a') as f:
     f.write(f"Identification tag: {identification_tag}\n")
     f.write(f"Accuracy score: {accuracy_score}\n")
     f.write("Classification Report: \n")
-    f.write(classification_report(y_test, y_pred, target_names=["NM", "AFM", "FM"]))
+    f.write(classification_report(y_test, y_pred, target_names=["NM", "AFM", "FiM", "FM"]))
     f.write("\n")

@@ -219,4 +219,4 @@ for i, struc in enumerate(structures):
     compound_list.append(str_struc)
 
 torch.save(data, run_name+'_data.pt')
-pickle.dump((formula_list_mp, sites_list, id_list), open('formula_and_sites.p', 'wb'))
+pickle.dump((formula_list_mp, sites_list, id_list), open(run_name+'_formula_and_sites.p', 'wb'))

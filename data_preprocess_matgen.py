@@ -115,5 +115,5 @@ structures = structures_list_mp
 y_values = y_values_mp
 id_list = id_list_mp
 
-pickle.dump((structures, y_values, formula_list_mp, sites_list, id_list), open('structure_info.p', 'wb'))
+pickle.dump((structures, y_values, formula_list_mp, sites_list, id_list), open(run_name+'structure_info.p', 'wb'))
 

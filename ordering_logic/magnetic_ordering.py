@@ -9,8 +9,8 @@ from util import *
 run_name = (time.strftime("%y%m%d-%H%M", time.localtime()))
 
 # if we already have a .pt file to pull data from
-data = torch.load('magnetic_ordering_data.pt')
-formula_list_mp, sites_list, id_list = pickle.load(open('formula_and_sites.p', 'rb'))
+data = torch.load('220320-1356_data.pt')
+formula_list_mp, sites_list, id_list = pickle.load(open('220320-1356_formula_and_sites.p', 'rb'))
 
 torch.set_default_dtype(torch.float64)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

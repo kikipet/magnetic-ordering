@@ -19,9 +19,10 @@ from pymatgen.ext.matproj import MPRester
 import pymatgen.analysis.magnetism.analyzer as pg
 import numpy as np
 import pickle
-from mendeleev import element
 
 import time
+
+import analyzer as a
 
 
 # %% Process Materials Project Data
@@ -38,7 +39,6 @@ magnetic_atoms = ['Ga', 'Tm', 'Y', 'Dy', 'Nb', 'Pu', 'Th', 'Er', 'U',
                   'Ti', 'Mo', 'Cu', 'Fe', 'Sm', 'Gd', 'V', 'Co', 'Eu',
                   'Ho', 'Mn', 'Os', 'Tb', 'Ir', 'Pt', 'Rh', 'Ru']
 
-# m = MPRester(api_key='PqU1TATsbzHEOkSX', endpoint=None, notify_db_version=True, include_user_agent=True)
 m = MPRester(endpoint=None, include_user_agent=True)
 structures = m.query(criteria={"elements": {"$in": magnetic_atoms}, 'blessed_tasks.GGA+U Static': {
                      '$exists': True}}, properties=["material_id", "pretty_formula", "structure", "blessed_tasks", "nsites"])
@@ -49,10 +49,10 @@ for struc in structures_copy:
         structures.remove(struc)
         print("MP Structure Deleted")
 
-# %% Separate data according to magnetic ordering + grab more information about each structure
+# %%
 order_list = []
 for i in range(len(structures)):
-    order = pg.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
+    order = a.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
     order_list.append(order.ordering.name)
 id_NM = []
 id_FM = []
@@ -77,7 +77,7 @@ np.random.shuffle(structures_mp)
 
 
 for structure in structures_mp:
-    analyzed_structure = pg.CollinearMagneticStructureAnalyzer(
+    analyzed_structure = a.CollinearMagneticStructureAnalyzer(
         structure["structure"])
     order_list_mp.append(analyzed_structure.ordering)
     structures_list_mp.append(structure["structure"])
@@ -87,6 +87,14 @@ for structure in structures_mp:
 
 for order in order_list_mp:
     y_values_mp.append(order_encode[order.name])
+
+# structures, y_values, formula_list_mp, sites_list, id_list = pickle.load(open('structure_info.p', 'rb')
+# )
+structures = structures_list_mp
+y_values = y_values_mp
+id_list = id_list_mp
+
+elements = pickle.load(open('element_info.p', 'rb'))
 
 torch.set_default_dtype(torch.float64)
 
@@ -120,9 +128,9 @@ print('Length of embedding feature vector: {:3d} \n'.format(params.get('len_embe
 run_name = (time.strftime("%y%m%d-%H%M", time.localtime()))
 
 
-structures = structures_list_mp
-y_values = y_values_mp
-id_list = id_list_mp
+# structures = structures_list_mp
+# y_values = y_values_mp
+# id_list = id_list_mp
 
 
 species = set()
@@ -146,7 +154,6 @@ lmax = 1
 n_norm = 35
 
 
-# Build list of DataPeriodicNeighbors structures
 data = []
 count = 0
 indices_to_delete = []
@@ -156,12 +163,9 @@ for i, struct in enumerate(structures):
             f"Encoding sample {i+1:5d}/{len(structures):5d}", end="\r", flush=True)
         input = torch.zeros(len(struct), 3*len_element)
         for j, site in enumerate(struct):
-            input[j, int(element(str(site.specie)).atomic_number)
-                  ] = element(str(site.specie)).atomic_radius
-            input[j, len_element + int(element(str(site.specie)).atomic_number) +
-                  1] = element(str(site.specie)).en_pauling
-            input[j, 2*len_element + int(element(str(site.specie)).atomic_number) + 1] = element(
-                str(site.specie)).dipole_polarizability
+            input[j, int(elements[str(site.specie)]['atomic_number'])] = elements[str(site.specie)]['atomic_radius']
+            input[j, len_element + int(elements[str(site.specie)]['atomic_number']) + 1] = elements[str(site.specie)]['en_pauling']
+            input[j, 2*len_element + int(elements[str(site.specie)]['atomic_number']) + 1] = elements[str(site.specie)]['dipole_polarizability']
         data.append(DataPeriodicNeighbors(
             x=input, Rs_in=None,
             pos=torch.tensor(struct.cart_coords.copy()), lattice=torch.tensor(struct.lattice.matrix.copy()),
@@ -216,6 +220,5 @@ for i, struc in enumerate(structures):
     str_struc = str_struc[:count]
     compound_list.append(str_struc)
 
-# save data
 torch.save(data, run_name+'_data.pt')
-pickle.dump((formula_list_mp, sites_list, id_list), open(run_name+'_formula_and_sites.p', 'wb'))
+pickle.dump((formula_list_mp, sites_list, id_list), open(run_name+'formula_and_sites.p', 'wb'))
