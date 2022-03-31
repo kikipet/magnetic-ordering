@@ -9,11 +9,8 @@ Created on Wed Dec  2 09:10:12 2020
 """
 
 import torch
-import torch_scatter
 
 from data_helpers import DataPeriodicNeighbors
-from e3nn.nn.models.gate_points_2101 import Convolution, Network
-from e3nn.o3 import Irreps
 
 from pymatgen.ext.matproj import MPRester
 import pymatgen.analysis.magnetism.analyzer as pg

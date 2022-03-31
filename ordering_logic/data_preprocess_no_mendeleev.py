@@ -9,29 +9,26 @@ Created on Wed Dec  2 09:10:12 2020
 """
 
 import torch
-import torch_scatter
 
 from data_helpers import DataPeriodicNeighbors
-from e3nn.nn.models.gate_points_2101 import Convolution, Network
-from e3nn.o3 import Irreps
 
 from pymatgen.ext.matproj import MPRester
-import pymatgen.analysis.magnetism.analyzer as pg
 import numpy as np
 import pickle
 
 import time
 
-import analyzer as a
+
+run_name = (time.strftime("%y%m%d-%H%M", time.localtime()))
 
 
-# %% Process Materials Project Data
+### Process Materials Project Data
 order_list_mp = []
-structures_list_mp = []
 formula_list_mp = []
 sites_list = []
-id_list_mp = []
-y_values_mp = []
+structures_list = []
+y_values = []
+id_list = []
 order_encode = {"NM": 0, "AFM": 1, "FM": 2, "FiM": 2}
 
 magnetic_atoms = ['Ga', 'Tm', 'Y', 'Dy', 'Nb', 'Pu', 'Th', 'Er', 'U',
@@ -41,7 +38,8 @@ magnetic_atoms = ['Ga', 'Tm', 'Y', 'Dy', 'Nb', 'Pu', 'Th', 'Er', 'U',
 
 m = MPRester(endpoint=None, include_user_agent=True)
 structures = m.query(criteria={"elements": {"$in": magnetic_atoms}, 'blessed_tasks.GGA+U Static': {
-                     '$exists': True}}, properties=["material_id", "pretty_formula", "structure", "blessed_tasks", "nsites"])
+                     '$exists': True}}, properties=["material_id", "pretty_formula", "structure", "blessed_tasks", "nsites", "magnetism"])
+# pickle.dump(structures, open(f'mpquery_{run_name}.p', 'wb'))
 
 structures_copy = structures.copy()
 for struc in structures_copy:
@@ -50,19 +48,15 @@ for struc in structures_copy:
         print("MP Structure Deleted")
 
 # %%
-order_list = []
-for i in range(len(structures)):
-    order = a.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
-    order_list.append(order.ordering.name)
 id_NM = []
 id_FM = []
 id_AFM = []
 for i in range(len(structures)):
-    if order_list[i] == 'NM':
+    if structures[i]["magnetism"]["ordering"] == 'NM':
         id_NM.append(i)
-    if order_list[i] == 'AFM':
+    elif structures[i]["magnetism"]["ordering"] == 'AFM':
         id_AFM.append(i)
-    if order_list[i] == 'FM' or order_list[i] == 'FiM':
+    elif structures[i]["magnetism"]["ordering"] == 'FM' or structures[i]["magnetism"]["ordering"] == 'FiM':
         id_FM.append(i)
 np.random.shuffle(id_FM)
 np.random.shuffle(id_NM)
@@ -71,28 +65,19 @@ id_AFM, id_AFM_to_delete = np.split(id_AFM, [int(len(id_AFM))])
 id_NM, id_NM_to_delete = np.split(id_NM, [int(1.2*len(id_AFM))])
 id_FM, id_FM_to_delete = np.split(id_FM, [int(1.2*len(id_AFM))])
 
-structures_mp = [structures[i] for i in id_NM] + [structures[j]
-                                                  for j in id_FM] + [structures[k] for k in id_AFM]
+structures_mp = [structures[i] for i in id_NM] + [structures[j] for j in id_FM] + [structures[k] for k in id_AFM]
 np.random.shuffle(structures_mp)
 
 
 for structure in structures_mp:
-    analyzed_structure = a.CollinearMagneticStructureAnalyzer(
-        structure["structure"])
-    order_list_mp.append(analyzed_structure.ordering)
-    structures_list_mp.append(structure["structure"])
+    order_list_mp.append(structure["magnetism"]["ordering"])
+    structures_list.append(structure["structure"])
     formula_list_mp.append(structure["pretty_formula"])
-    id_list_mp.append(structure["material_id"])
+    id_list.append(structure["material_id"])
     sites_list.append(structure["nsites"])
 
-for order in order_list_mp:
-    y_values_mp.append(order_encode[order.name])
 
-# structures, y_values, formula_list_mp, sites_list, id_list = pickle.load(open('structure_info.p', 'rb')
-# )
-structures = structures_list_mp
-y_values = y_values_mp
-id_list = id_list_mp
+y_values = [order_encode[order] for order in order_list_mp]
 
 elements = pickle.load(open('element_info.p', 'rb'))
 
@@ -125,17 +110,9 @@ print('Length of embedding feature vector: {:3d} \n'.format(params.get('len_embe
       )
 
 
-run_name = (time.strftime("%y%m%d-%H%M", time.localtime()))
-
-
-# structures = structures_list_mp
-# y_values = y_values_mp
-# id_list = id_list_mp
-
-
 species = set()
 count = 0
-for struct in structures[:]:
+for struct in structures_list[:]:
     try:
         species = species.union(list(set(map(str, struct.species))))
         count += 1
@@ -157,10 +134,10 @@ n_norm = 35
 data = []
 count = 0
 indices_to_delete = []
-for i, struct in enumerate(structures):
+for i, struct in enumerate(structures_list):
     try:
         print(
-            f"Encoding sample {i+1:5d}/{len(structures):5d}", end="\r", flush=True)
+            f"Encoding sample {i+1:5d}/{len(structures_list):5d}", end="\r", flush=True)
         input = torch.zeros(len(struct), 3*len_element)
         for j, site in enumerate(struct):
             input[j, int(elements[str(site.specie)]['atomic_number'])] = elements[str(site.specie)]['atomic_radius']
@@ -184,8 +161,8 @@ for i, struct in enumerate(structures):
 
 
 struc_dictionary = dict()
-for i in range(len(structures)):
-    struc_dictionary[i] = structures[i]
+for i in range(len(structures_list)):
+    struc_dictionary[i] = structures_list[i]
 
 id_dictionary = dict()
 for i in range(len(id_list)):
@@ -195,11 +172,11 @@ for i in indices_to_delete:
     del struc_dictionary[i]
     del id_dictionary[i]
 
-structures2 = []
-for i in range(len(structures)):
+structures_temp = []
+for i in range(len(structures_list)):
     if i in struc_dictionary.keys():
-        structures2.append(struc_dictionary[i])
-structures = structures2
+        structures_temp.append(struc_dictionary[i])
+structures = structures_temp
 
 id2 = []
 for i in range(len(id_list)):

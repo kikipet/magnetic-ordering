@@ -1,3 +1,0 @@
-Iteration: 1:1:1.1 Relu wd:0.03 4 Lineartrain average loss: 0.893966112797425 
- validation average loss: 0.9189893504857689 
-Iteration: 1:1:1.1 Relu wd:0.03 4 Linear

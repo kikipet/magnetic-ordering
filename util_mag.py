@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch_geometric
-import torch_scatter
+import torch_geometric as tg
 
 import e3nn
 from e3nn import o3
@@ -78,8 +77,8 @@ def create_dataloaders(data, batch_size=1):
     assert set(index_tr).isdisjoint(set(index_va))
     assert set(index_te).isdisjoint(set(index_va))
 
-    dataloader = torch_geometric.loader.DataLoader([data[i] for i in index_tr], batch_size=batch_size, shuffle=True)
-    dataloader_valid = torch_geometric.loader.DataLoader([data[i] for i in index_va], batch_size=batch_size)
+    dataloader = tg.loader.DataLoader([data[i] for i in index_tr], batch_size=batch_size, shuffle=True)
+    dataloader_valid = tg.loader.DataLoader([data[i] for i in index_va], batch_size=batch_size)
 
     return index_tr, index_va, index_te, dataloader, dataloader_valid
 
@@ -97,7 +96,7 @@ def evaluate(model, loss_fn, dataloader, device, cost_multiplier=1.0):
     with torch.no_grad():
         for _, d in enumerate(dataloader):
             d.to(device)
-            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 4)))
+            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
             if d.y.item() == 2:
                 loss = cost_multiplier*loss_fn(output, d.y).cpu()
                 print("Multiplied Loss Index \n")
@@ -123,7 +122,7 @@ def train(model, optimizer, loss_fn, dataloader, dataloader_valid, scheduler, ma
         loss_cumulative = 0.
         for j, d in enumerate(dataloader):
             d.to(device)
-            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 4)))
+            output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
             loss = loss_fn(output, d.y).cpu()
             print(f"Iteration {step+1:4d}    batch {j+1:5d} / {len(dataloader):5d}   " + f"batch loss = {loss.data}", end="\r", flush=True)
             loss_cumulative = loss_cumulative + loss.detach().item()
@@ -179,16 +178,20 @@ def plots(run_name):
 def run_write_data(stage, indices, data, model, device, formula_list_mp, id_list):
     composition_dict = {}
     sites_dict = {}
+    y_pred = []
+    # only used if stage=='testing'
     y_test = []
     y_score = []
-    y_pred = []
 
     for _, index in enumerate(indices):
-        d = torch_geometric.data.Batch.from_data_list([data[index]])
+        d = tg.data.Batch.from_data_list([data[index]])
         d.to(device)
-        output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 4)))
+        # run the model on the current batch
+        #   pos: position of the nodes (atoms)
+        #   z: attributes of nodes, initialized as blank
+        output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
 
-        # test-unique things
+        # if this is the test set, we should also prepare y_test and y_score to return
         if stage == 'testing':
             y_test.append(d.y.item())
             y_score.append(output)
@@ -196,12 +199,18 @@ def run_write_data(stage, indices, data, model, device, formula_list_mp, id_list
         with open(f'{stage}_results.txt', 'a') as f:
             f.write(f"Output for below sample: {torch.exp(output)} \n")
 
-        prediction = output[0].index(max(output[0])) # I wonder if this syntax works
-        y_pred.append(prediction)
+        # find the output encoding
+        if max(output[0][0], output[0][1], output[0][2]) == output[0][0]:
+            output = 0
+        elif max(output[0][0], output[0][1], output[0][2]) == output[0][1]:
+            output = 1
+        else:
+            output = 2
+        y_pred.append(output)
         with open(f'{stage}_results.txt', 'a') as f:
-            f.write(f"{id_list[index]} {formula_list_mp[index]} Prediction: {prediction} Actual: {d.y} \n")
+            f.write(f"{id_list[index]} {formula_list_mp[index]} Prediction: {output} Actual: {d.y} \n")
         
-        correct_flag = d.y.item() == prediction
+        correct_flag = d.y.item() == output
 
         # Accuracy per element calculation
         current_element = ""
