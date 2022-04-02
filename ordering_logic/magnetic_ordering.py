@@ -117,4 +117,3 @@ with open('statistics.txt', 'a') as f:
     f.write("Classification Report: \n")
     f.write(classification_report(y_test, y_pred, target_names=["NM", "AFM", "FM"]))
     f.write("\n")
-
