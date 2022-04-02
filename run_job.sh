@@ -9,5 +9,6 @@ eval "$(conda shell.bash hook)"
 source .bashrc
 conda activate /home/gridsan/sekim/.conda/envs/e3nn
 
-cd $1
-python magnetic_ordering.py
+cd magnetic-ordering/run_0310
+python data_preprocess_no_mendeleev.py
+python magnetic_ordering_draft.py
