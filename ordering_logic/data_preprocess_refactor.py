@@ -28,8 +28,6 @@ ELEMENTS = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'A
 
 torch.set_default_dtype(torch.float64)
 
-# run_name = time.strftime("%y%m%d-%H%M", time.localtime())
-
 def get_element_info():
     from mendeleev import element
 
@@ -142,3 +140,7 @@ def get_dataset(run_name, save_query=False, local_data=False, local_elements=Tru
 
     torch.save(data, run_name+'_data.pt')
     pickle.dump((formula_list_mp, sites_list, id_list_f), open(run_name+'_formula_and_sites.p', 'wb'))
+
+
+if __name__ == "__main__":
+    get_dataset(time.strftime("%y%m%d-%H%M", time.localtime()))
