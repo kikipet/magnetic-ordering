@@ -3,14 +3,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from util_mag import *
+from util import *
 
 ### Setup
 run_name = (time.strftime("%y%m%d-%H%M", time.localtime()))
 
 # if we already have a .pt file to pull data from
-data = torch.load('magnetic_ordering_data.pt')
-formula_list_mp, sites_list, id_list = pickle.load(open('formula_and_sites.p', 'rb'))
+data = torch.load('220320-1356_data.pt')
+formula_list_mp, sites_list, id_list = pickle.load(open('220320-1356_formula_and_sites.p', 'rb'))
 
 torch.set_default_dtype(torch.float64)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,6 +30,17 @@ params = {'len_embed_feat': 64,
 identification_tag = "1:1:1.1 Relu wd:0.03 4 Linear"
 cost_multiplier = 1.0
 
+print('Length of embedding feature vector: {:3d} \n'.format(params.get('len_embed_feat')) +
+    'Number of channels per irreducible representation: {:3d} \n'.format(params.get('num_channel_irrep')) +
+    'Number of tensor field convolution layers: {:3d} \n'.format(params.get('num_e3nn_layer')) +
+    'Maximum radius: {:3.1f} \n'.format(params.get('max_radius')) +
+    'Number of basis: {:3d} \n'.format(params.get('num_basis')) +
+    'AdamW optimizer learning rate: {:.4f} \n'.format(params.get('adamw_lr')) +
+    'AdamW optimizer weight decay coefficient: {:.4f}'.format(
+        params.get('adamw_wd'))
+    )
+
+
 len_element = 118
 atom_types_dim = 3*len_element
 embedding_dim = params['len_embed_feat']
@@ -48,7 +59,7 @@ model_kwargs = {
     "irreps_out": irreps_out,
     "irreps_node_attr": '3x0e',
     "irreps_edge_attr": '0e+1o',  # relative distance vector 
-    # "irreps_edge_attr": '1o',  # relative distance vector - this doesn't work for some reason
+    # "irreps_edge_attr": '1o',  # relative distance vector 
     "layers": params['num_e3nn_layer'],
     "max_radius": params['max_radius'],
     "number_of_basis": params['num_basis'],
@@ -57,20 +68,9 @@ model_kwargs = {
     "num_neighbors": 35,
     "num_nodes": 35 # not really sure
 }
-
-print('Length of embedding feature vector: {:3d} \n'.format(params.get('len_embed_feat')) +
-    'Number of channels per irreducible representation: {:3d} \n'.format(params.get('num_channel_irrep')) +
-    'Number of tensor field convolution layers: {:3d} \n'.format(params.get('num_e3nn_layer')) +
-    'Maximum radius: {:3.1f} \n'.format(params.get('max_radius')) +
-    'Number of basis: {:3d} \n'.format(params.get('num_basis')) +
-    'AdamW optimizer learning rate: {:.4f} \n'.format(params.get('adamw_lr')) +
-    'AdamW optimizer weight decay coefficient: {:.4f}'.format(
-        params.get('adamw_wd'))
-    )
 print(model_kwargs)
 
 
-### create model/optimizer
 model = AtomEmbeddingAndSumLastLayer(atom_types_dim, embedding_dim, Network(**model_kwargs))
 opt = torch.optim.AdamW(model.parameters(), lr=params['adamw_lr'], weight_decay=params['adamw_wd'])
 
