@@ -75,7 +75,7 @@ def run_model(run_name, magfile, datafile):
 
 
     ### prepare data
-    index_tr, index_va, index_te, dataloader, dataloader_valid = create_dataloaders(data, batch_size=1)
+    index_tr, index_va, index_te, dataloader, dataloader_valid = create_dataloaders(data, batch_size=20)
 
     with open('loss.txt', 'a') as f:
         f.write(f"Iteration: {identification_tag}")

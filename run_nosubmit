@@ -20,4 +20,3 @@ conda activate /home/gridsan/sekim/.conda/envs/e3nn
 cd magnetic-ordering/$1
 python magnetic_ordering.py" > run_job.sh
 
-LLsub run_job.sh

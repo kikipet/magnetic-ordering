@@ -1,0 +1,22 @@
+Iteration: 1:1:1.1 Relu wd:0.03 4 Lineartrain average loss: 1.0413029530909774 
+ validation average loss: 1.0410154625800834 
+train average loss: 1.0263218625802006 
+ validation average loss: 1.0200402568148286 
+train average loss: 0.9255208919876629 
+ validation average loss: 0.9115050277657761 
+train average loss: 0.8899749034819794 
+ validation average loss: 0.8904465907416764 
+train average loss: 0.8605445107898951 
+ validation average loss: 0.8737589832525544 
+train average loss: 0.8484137956630958 
+ validation average loss: 0.8730086358031384 
+train average loss: 0.8452731522976634 
+ validation average loss: 0.87372574813987 
+train average loss: 0.8445141034508812 
+ validation average loss: 0.8729418557913591 
+train average loss: 0.8443225968605655 
+ validation average loss: 0.8729976038212145 
+train average loss: 0.8442755618889078 
+ validation average loss: 0.8730208424343221 
+train average loss: 0.8442620625239491 
+ validation average loss: 0.873014751325119 
