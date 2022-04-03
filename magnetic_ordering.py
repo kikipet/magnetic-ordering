@@ -75,6 +75,7 @@ def run_model(run_name, magfile, datafile):
 
 
     ### prepare data
+    # is batch_size the number of batches?
     index_tr, index_va, index_te, dataloader, dataloader_valid = create_dataloaders(data, batch_size=1)
 
     with open('loss.txt', 'a') as f:
