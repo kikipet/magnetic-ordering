@@ -75,6 +75,7 @@ def run_model(run_name, magfile, datafile):
 
 
     ### prepare data
+    # is batch_size the number of batches?
     index_tr, index_va, index_te, dataloader, dataloader_valid = create_dataloaders(data, batch_size=1)
 
     with open('loss.txt', 'a') as f:
@@ -117,5 +118,5 @@ def run_model(run_name, magfile, datafile):
         f.write(classification_report(y_test, y_pred, target_names=["NM", "AFM", "FM"]))
         f.write("\n")
 
-if __name__ == "main":
+if __name__ == "__main__":
     run_model(time.strftime("%y%m%d-%H%M", time.localtime()), "magnetic_ordering_data.pt", "formula_and_sites.p")

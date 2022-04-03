@@ -77,6 +77,8 @@ def create_dataloaders(data, batch_size=1):
     assert set(index_tr).isdisjoint(set(index_va))
     assert set(index_te).isdisjoint(set(index_va))
 
+    pickle.dump((index_tr, index_va, index_te), open("data_splits.p", "wb"))
+
     dataloader = tg.loader.DataLoader([data[i] for i in index_tr], batch_size=batch_size, shuffle=True)
     dataloader_valid = tg.loader.DataLoader([data[i] for i in index_va], batch_size=batch_size)
 
@@ -178,9 +180,10 @@ def plots(run_name):
 def run_write_data(stage, indices, data, model, device, formula_list_mp, id_list):
     composition_dict = {}
     sites_dict = {}
+    y_output = []
     y_pred = []
+    y_actual = []
     # only used if stage=='testing'
-    y_test = []
     y_score = []
 
     for _, index in enumerate(indices):
@@ -189,20 +192,21 @@ def run_write_data(stage, indices, data, model, device, formula_list_mp, id_list
         # run the model on the current batch
         #   pos: position of the nodes (atoms)
         #   z: attributes of nodes, initialized as blank
-        output = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
+        output_vec = model(x=d.x, batch=d.batch, pos=d.pos, z=d.pos.new_ones((d.pos.shape[0], 3)))
+        y_output.append(output_vec)
 
-        # if this is the test set, we should also prepare y_test and y_score to return
+        # if this is the test set, we should also prepare y_actual and y_score to return
         if stage == 'testing':
-            y_test.append(d.y.item())
-            y_score.append(output)
+            y_actual.append(d.y.item())
+            y_score.append(output_vec)
 
         with open(f'{stage}_results.txt', 'a') as f:
-            f.write(f"Output for below sample: {torch.exp(output)} \n")
+            f.write(f"Output for below sample: {torch.exp(output_vec)} \n")
 
         # find the output encoding
-        if max(output[0][0], output[0][1], output[0][2]) == output[0][0]:
+        if max(output_vec[0][0], output_vec[0][1], output_vec[0][2]) == output_vec[0][0]:
             output = 0
-        elif max(output[0][0], output[0][1], output[0][2]) == output[0][1]:
+        elif max(output_vec[0][0], output_vec[0][1], output_vec[0][2]) == output_vec[0][1]:
             output = 1
         else:
             output = 2
@@ -232,6 +236,9 @@ def run_write_data(stage, indices, data, model, device, formula_list_mp, id_list
                     composition_dict[current_element] = current_entry
                     current_element = ""
 
+    # Raw output (i.e. triples)
+    pickle.dump(y_output, open(f'{stage}_output_raw.p', 'wb'))
+
     # Accuracy per element depiction
     with open(f'{stage}_composition_info.txt', 'a') as f:
         f.write(f"{stage.capitalize()} Composition Ratios: \n")
@@ -245,4 +252,4 @@ def run_write_data(stage, indices, data, model, device, formula_list_mp, id_list
             f.write(f"nsites: {key} Ratio: {value[0]}/{value[1]} Fraction: {value[0]/value[1]}\n")
 
     if stage == 'testing':
-        return y_test, y_pred
+        return y_actual, y_pred
