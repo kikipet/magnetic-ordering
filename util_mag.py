@@ -77,6 +77,8 @@ def create_dataloaders(data, batch_size=1):
     assert set(index_tr).isdisjoint(set(index_va))
     assert set(index_te).isdisjoint(set(index_va))
 
+    pickle.dump((index_tr, index_va, index_te), open("data_splits.p", "wb"))
+
     dataloader = tg.loader.DataLoader([data[i] for i in index_tr], batch_size=batch_size, shuffle=True)
     dataloader_valid = tg.loader.DataLoader([data[i] for i in index_va], batch_size=batch_size)
 
