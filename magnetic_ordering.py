@@ -33,8 +33,6 @@ def run_model(run_name, magfile, datafile):
     atom_types_dim = 3*len_element
     embedding_dim = params['len_embed_feat']
     lmax = 1
-    # Roughly the average number (over entire dataset) of nearest neighbors for a given atom
-    n_norm = 35
 
     # num_atom_types scalars (L=0) with even parity
     irreps_in = Irreps([(45, (0, 1))])
@@ -99,7 +97,7 @@ def run_model(run_name, magfile, datafile):
     run_write_data('validation', index_va, data, model, device, formula_list_mp, id_list)
     y_test, y_pred = run_write_data('testing', index_te, data, model, device, formula_list_mp, id_list)
 
-    accuracy_score = accuracy_score(y_test, y_pred)
+    score = accuracy_score(y_test, y_pred)
 
     with open('y_pred.txt', 'a') as f:
         f.write("Predicted Values \n")
@@ -113,7 +111,7 @@ def run_model(run_name, magfile, datafile):
         f.write("\n")
         f.write("Network Analytics: \n")
         f.write(f"Identification tag: {identification_tag}\n")
-        f.write(f"Accuracy score: {accuracy_score}\n")
+        f.write(f"Accuracy score: {score}\n")
         f.write("Classification Report: \n")
         f.write(classification_report(y_test, y_pred, target_names=["NM", "AFM", "FM"]))
         f.write("\n")

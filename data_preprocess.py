@@ -80,7 +80,6 @@ def get_dataset(run_name, save_query=False, local_data=False, local_elements=Tru
     formula_list_mp = []
     sites_list = []
     structures_list = []
-    y_values = []
     id_list = []
 
     for structure in structures_mp:
@@ -136,10 +135,12 @@ def get_dataset(run_name, save_query=False, local_data=False, local_elements=Tru
             print(f"Error: {i} {e}", end="\n")
             continue
 
+    formula_list_f = [formula_list_mp[i] for i in range(len(formula_list_mp)) if i not in indices_to_delete]
+    sites_list_f = [sites_list[i] for i in range(len(sites_list)) if i not in indices_to_delete]
     id_list_f = [id_list[i] for i in range(len(id_list)) if i not in indices_to_delete]
 
     torch.save(data, run_name+'_data.pt')
-    pickle.dump((formula_list_mp, sites_list, id_list_f), open(run_name+'_formula_and_sites.p', 'wb'))
+    pickle.dump((formula_list_f, sites_list_f, id_list_f), open(run_name+'_formula_and_sites.p', 'wb'))
 
 
 if __name__ == "__main__":
