@@ -10,7 +10,6 @@ Created on Wed Dec  2 09:10:12 2020
 
 import torch
 from data_helpers import DataPeriodicNeighbors
-import analyzer as a
 
 from pymatgen.ext.matproj import MPRester
 import numpy as np
@@ -44,41 +43,28 @@ def get_element_info():
     pickle.dump(element_info, open('elements.p', 'wb'))
     return element_info
 
-def get_dataset(run_name, save_query=False, local_data=False, local_elements=True, use_matgen_order=False):
+def get_dataset(run_name, save_query=False, local_data=False, local_elements=True):
     ### Get raw data
     if local_data:
         structures = pickle.load(structures, open(f'mpquery_{run_name}.p', 'rb'))
     else:
         m = MPRester(endpoint=None, include_user_agent=True)
-        structures = m.query(criteria={"elements": {"$in": MAGNETIC_ATOMS}, 'blessed_tasks.GGA+U Static': {
-                     '$exists': True}}, properties=["material_id", "pretty_formula", "structure", "blessed_tasks", "nsites", "magnetism"])
+        structures = m.query(criteria={"elements": {"$in": MAGNETIC_ATOMS}, 'blessed_tasks.GGA+U Static': {'$exists': True}}, 
+                            properties=["material_id", "pretty_formula", "structure", "nsites", "magnetism"])
         structures = list(filter(lambda struc: len(struc["structure"]) <= 250, structures))
         if save_query: pickle.dump(structures, open(f'mpquery_{run_name}.p', 'wb'))
 
     ### Split data + shuffle
-    order_list = []
-    for i in range(len(structures)):
-        order = a.CollinearMagneticStructureAnalyzer(structures[i]["structure"])
-        order_list.append(order.ordering.name)
     id_NM = []
     id_FM = []
     id_AFM = []
-    if use_matgen_order:
-        for i in range(len(structures)):
-            if structures[i]["magnetism"]["ordering"] == 'NM':
-                id_NM.append(i)
-            elif structures[i]["magnetism"]["ordering"] == 'AFM':
-                id_AFM.append(i)
-            elif structures[i]["magnetism"]["ordering"] in ['FM', 'FiM']:
-                id_FM.append(i)
-    else:
-        for i in range(len(structures)):
-            if order_list[i] == 'NM':
-                id_NM.append(i)
-            elif order_list[i] == 'AFM':
-                id_AFM.append(i)
-            elif order_list[i] in ['FM', 'FiM']:
-                id_FM.append(i)
+    for i in range(len(structures)):
+        if structures[i]["magnetism"]["ordering"] == 'NM':
+            id_NM.append(i)
+        elif structures[i]["magnetism"]["ordering"] == 'AFM':
+            id_AFM.append(i)
+        elif structures[i]["magnetism"]["ordering"] in ['FM', 'FiM']:
+            id_FM.append(i)
     np.random.shuffle(id_FM)
     np.random.shuffle(id_NM)
     np.random.shuffle(id_AFM)
@@ -97,12 +83,7 @@ def get_dataset(run_name, save_query=False, local_data=False, local_elements=Tru
     id_list = []
 
     for structure in structures_mp:
-        if use_matgen_order:
-            order_list_mp.append(structure["magnetism"]["ordering"])
-        else:
-            analyzed_structure = a.CollinearMagneticStructureAnalyzer(
-            structure["structure"])
-            order_list_mp.append(analyzed_structure.ordering.name)
+        order_list_mp.append(structure["magnetism"]["ordering"])
         structures_list.append(structure["structure"])
         formula_list_mp.append(structure["pretty_formula"])
         id_list.append(structure["material_id"])
