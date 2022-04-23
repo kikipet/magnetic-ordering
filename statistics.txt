@@ -1,0 +1,13 @@
+Network Analytics: 
+Identification tag: 1:1:1.1 Relu wd:0.03 4 Linear
+Accuracy score: 0.7167182662538699
+Classification Report: 
+              precision    recall  f1-score   support
+
+          NM       0.88      0.84      0.86       238
+         AFM       0.66      0.61      0.63       204
+          FM       0.61      0.68      0.64       204
+
+    accuracy                           0.72       646
+   macro avg       0.71      0.71      0.71       646
+weighted avg       0.72      0.72      0.72       646
